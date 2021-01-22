@@ -9,6 +9,10 @@ class Asset_Models(models.Model):
     model_count = models.IntegerField()
     model_deleted = models.BooleanField(default=False)
     model_min_qty = models.PositiveIntegerField("minimum quantity", null=True)
+    
+    def __str__(self):
+        """String for representing the Model object."""
+        return self.model_manufacturer_name + " " + self.model_name + " " + self.model_number
 
 class Asset_Report(models.Model):
     snipe_model_id = models.IntegerField()
