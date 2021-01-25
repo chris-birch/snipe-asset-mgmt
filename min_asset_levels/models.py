@@ -7,8 +7,8 @@ class Asset_Models(models.Model):
     model_number = models.CharField(max_length=250)
     model_category = models.CharField(max_length=250)
     model_count = models.IntegerField()
-    model_deleted = models.BooleanField(default=False)
-    model_min_qty = models.PositiveIntegerField("minimum quantity", null=True)
+    model_count_RTD = models.IntegerField(default=0)
+    model_min_qty = models.PositiveIntegerField("minimum quantity", default=0)
     
     def __str__(self):
         """String for representing the Model object."""
@@ -16,9 +16,6 @@ class Asset_Models(models.Model):
 
 class Asset_Report(models.Model):
     snipe_model_id = models.IntegerField()
-    model_name = models.CharField(max_length=250)
-    model_manufacturer_name = models.CharField(max_length=250)
-    model_number = models.CharField(max_length=250)
-    model_category = models.CharField(max_length=250)
     model_location = models.CharField(max_length=250)
     model_custom_fields = models.TextField()
+    model_asset_id = models.CharField(max_length=250, default='None')
