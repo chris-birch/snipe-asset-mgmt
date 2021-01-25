@@ -24,25 +24,30 @@ def SnipeApi(api_resource, params):
         
         # If the response was successful, no Exception will be raised
         r.raise_for_status()
+    
     except HTTPError as http_err:
-        print(f'HTTP error occurred: {http_err}')  # Python 3.6
-        
-        return http_err
+        raise HTTPError('HTTP error occurred', http_err)
+
     except Exception as err:
-        print(f'Other error occurred: {err}')  # Python 3.6
-        
-        return err
+        raise Exception('HTTP error occurred', err)
+
     else:
         # Check if the HTML login screen is being returned
         if '<!DOCTYPE html>' in r.text:
-            return json.dumps({"error": "API Authentication fail"})
+            raise Exception("Error: API Authentication fail")
         else:
             return r.json()
 
 
 def getSnipeModles():
-    api_model_data = SnipeApi('models', {})
+    
+    try:
+        api_model_data = SnipeApi('models', {})
+    
+    except Exception as error:
+            return json.dumps({"error": str(error.args)})
 
+    return_output = {}
     snipeAssetIDs = []
 
     # The API limit on the AWS hosted server is 120 per min so don't want to paginate
@@ -83,6 +88,12 @@ def getSnipeModles():
             new_asset_model.model_count = snipe_asset_model['model_count']
             new_asset_model.model_min_qty = int(0)
             new_asset_model.save()
+
+            if 'new_asset_model' not in return_output:
+                return_output['new_asset_model'] = {}
+
+            return_output['new_asset_model'][snipe_asset_model['snipe_model_id']] = snipe_asset_model['model_manufacturer_name'] + " " + snipe_asset_model['model_name'] + " " + snipe_asset_model['model_number']
+
             continue
 
         ### Check for any changed data, update the database ###
@@ -108,12 +119,12 @@ def getSnipeModles():
             # Prime the Django asset model with the updated data
             new_asset_model.__dict__.update(data_to_save)
             
-            try:
-                new_asset_model.save()
-            except:
-                print("FAIL: " + each_asset_model['name'])
-            else:
-                print("SECCSESS: " + each_asset_model['name'])
+            new_asset_model.save()
+
+            if 'updated_asset_model' not in return_output:
+                return_output['updated_asset_model'] = {}
+
+            return_output['updated_asset_model'][snipe_asset_model['snipe_model_id']] = snipe_asset_model['model_manufacturer_name'] + " " + snipe_asset_model['model_name'] + " " + snipe_asset_model['model_number']
 
             continue
 
@@ -127,14 +138,22 @@ def getSnipeModles():
         for item, snipe_asset_id in diff_result['iterable_item_removed'].items():
 
             deleted_asset_model = Asset_Models.objects.get(snipe_model_id=int(snipe_asset_id))
-            deleted_asset_model.delete()
 
-    return db_asset_models
+            if 'deleted_asset_model' not in return_output:
+                return_output['deleted_asset_model'] = {}
+            
+            return_output['deleted_asset_model'][snipe_asset_id] = deleted_asset_model.model_manufacturer_name + " " + deleted_asset_model.model_name + " " + deleted_asset_model.model_number
+
+            deleted_asset_model.delete()    
+
+    return return_output
 
 #
-# !!! This is a long running query and should only be run as needed !!!
+# !!! This is a long running db & API query and should only be run as needed !!!
 #
 def populateReportTable():
+    return_output = {}
+
     db_asset_models = Asset_Models.objects.all()
 
     # Empty the report table ready for new data
@@ -143,13 +162,27 @@ def populateReportTable():
     # Asset models in the db, the API asset data
     for each_db_asset_model in db_asset_models.values():
 
+        old_rtd_qty = each_db_asset_model['model_count_RTD']
+
         querystring = {"model_id":each_db_asset_model['snipe_model_id'],"status":"RTD"}
-        api_data = SnipeApi('hardware', querystring)
+
+        try:
+            api_data = SnipeApi('hardware', querystring)
+    
+        except Exception as error:
+            return json.dumps({"error": str(error.args)})
 
         if api_data:
             
             # Update the asset model Ready_To_Deploy anount in the db
-            db_asset_models.filter(id=each_db_asset_model['id']).update(model_count_RTD=int(api_data['total']))     
+            db_asset_models.filter(id=each_db_asset_model['id']).update(model_count_RTD=int(api_data['total']))
+
+            new_rtd_qty = api_data['total']
+            
+            if 'model_count_RTD' not in return_output:
+                return_output['model_count_RTD'] = {}
+            
+            return_output['model_count_RTD'][each_db_asset_model['id']] = each_db_asset_model['model_manufacturer_name'] + " " + each_db_asset_model['model_name'] + " " + each_db_asset_model['model_number'], {'qty' : {'old': old_rtd_qty, 'new': new_rtd_qty}}
 
             # Get the asset info where we have it in the API
             if api_data['total'] > 0:
@@ -176,18 +209,18 @@ def populateReportTable():
                     # Prime the Django asset model with the updated data
                     new_asset_report_model.__dict__.update(db_asset_report_model)
                     
-                    try:
-                        new_asset_report_model.save()
-                    except:
-                        print("FAIL: " + each_api_asset['asset_tag'])
-                    else:
-                        print("SECCSESS: " + each_api_asset['asset_tag'])
+                    new_asset_report_model.save()
 
         else:
             return json.dumps({"error": "No data returned from the API"})
+    
+    return return_output
 
 def index(request):
-    snipe_models = getSnipeModles()
-    populateReportTable()
-    context = {'snipe_models': snipe_models}
+    #snipe_models = getSnipeModles()
+    table_update = populateReportTable()
+    
+    #pprint (snipe_models)
+    # populateReportTable()
+    context = {'snipe_models': table_update}
     return render(request, 'min_asset_levels/index.html', context)
