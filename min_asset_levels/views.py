@@ -1,6 +1,8 @@
 from django.shortcuts import render
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 
 from .models import Asset_Models, Asset_Report
+from .forms import EditMinQty
 
 import requests
 import json
@@ -217,10 +219,43 @@ def populateReportTable():
     return return_output
 
 def index(request):
-    #snipe_models = getSnipeModles()
-    table_update = populateReportTable()
-    
-    #pprint (snipe_models)
-    # populateReportTable()
-    context = {'snipe_models': table_update}
+    db_Asset_Models = Asset_Models.objects.all()
+
+    context = {'asset_model': db_Asset_Models}
     return render(request, 'min_asset_levels/index.html', context)
+
+
+def assetModelData(request):
+
+    # Run the getSnipeModles(), return error if fail
+    getSnipeModles()
+    db_Asset_Models = Asset_Models.objects.all().values()
+    db_Asset_Models_list = list(db_Asset_Models)
+    data = json.dumps(db_Asset_Models_list)
+
+    return HttpResponse(data, content_type="application/json")
+
+def minQtyUpdate(request, pk=0):
+    # if this is a POST request we need to process the form data
+    if request.method == 'POST':
+        try:
+            AssetModel = Asset_Models.objects.get(id=pk)
+        except:
+            raise Http404("Asset does not exist")
+
+        # create a form instance and populate it with data from the request:
+        form = EditMinQty(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            AssetModel.model_min_qty = form.cleaned_data['min_qty']
+            AssetModel.save()
+
+            http_data = json.dumps({"success": "Asset Model Saved"})
+            return HttpResponse(http_data, content_type="application/json")
+
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = EditMinQty()
+
+    return render(request, 'min_asset_levels/EditMinQtyForm.html', {'form': form})

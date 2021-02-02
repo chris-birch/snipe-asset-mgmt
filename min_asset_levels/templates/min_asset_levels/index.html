@@ -1,5 +1,60 @@
-{% if snipe_models %}
-    <p>{{ snipe_models }}</p>
-{% else %}
-    <p>No Modles</p>
-{% endif %}
+{% extends "min_asset_levels/base.html" %}
+
+{% block content %} 
+
+    {% if asset_model %}
+        <div id="toolbar">
+            <h6>Click on any row to modify the minimum quantity level</h6>
+        </div>
+        <table id="table" 
+        data-toggle="table" 
+        data-search="true" 
+        data-pagination="true" 
+        data-url="{% url 'asset_model_json' %}"
+        data-show-refresh="true"
+        data-page-size='25'
+        data-toolbar="#toolbar"
+        >
+            <thead>
+                <tr>
+                <th data-sortable="true" data-field="model_manufacturer_name">Manufacturer</th>
+                <th data-sortable="true" data-field="model_name">Model</th>
+                <th data-sortable="true" data-field="model_number">Model Number</th>
+                <th data-sortable="true" data-field="model_count" data-title-tooltip="Total number of assets in the system">Total Qty</th>
+                <th data-sortable="true" data-field="model_count_RTD" data-title-tooltip="Total number of assets Ready To Deploy. Only updated once a day!">Qty RTD</th>
+                <th data-sortable="true" data-field="model_min_qty" data-title-tooltip="Minimum asset level before RTD before we're alerted">Min Qty</th>
+                </tr>
+            </thead>
+        </table>
+
+        <div id="modal" class="modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modify Minimum Quantity</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="model-alert" class="alert alert-danger" role="alert">
+                        This is a dark alert—check it out!
+                    </div>
+                    <em><p id="form_asset_name">Asset name</p></em>
+                    <div id="django-form"></div>
+                </div>
+                <div class="modal-footer">
+                    <button id="sub" type="button" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+        </div>
+        
+    {% else %}
+
+        <p>No Modles</p>
+
+    {% endif %}
+
+{% endblock %}
