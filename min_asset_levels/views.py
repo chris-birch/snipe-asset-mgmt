@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-
+from django.db.models import F
 from .models import Asset_Models, Asset_Report
 from .forms import EditMinQty
 
@@ -200,7 +200,7 @@ def populateReportTable():
                         location = 'Unknown'
 
                     db_asset_report_model = {}
-                    db_asset_report_model['snipe_model_id'] = int(each_api_asset['model']['id'])
+                    db_asset_report_model['asset_model_id'] = each_db_asset_model['id']
                     db_asset_report_model['model_location'] = location
                     db_asset_report_model['model_custom_fields'] = each_api_asset['custom_fields']
                     db_asset_report_model['model_asset_id'] = each_api_asset['asset_tag']
@@ -224,9 +224,7 @@ def index(request):
     context = {'asset_model': db_Asset_Models}
     return render(request, 'min_asset_levels/index.html', context)
 
-
 def assetModelData(request):
-
     # Run the getSnipeModles(), return error if fail
     getSnipeModles()
     db_Asset_Models = Asset_Models.objects.all().values()
@@ -259,3 +257,13 @@ def minQtyUpdate(request, pk=0):
         form = EditMinQty()
 
     return render(request, 'min_asset_levels/EditMinQtyForm.html', {'form': form})
+
+def html_asset_report(request):
+    # Update the Report Data with the latest data from Snipe
+    # populateReportTable()
+
+    # Get the data from the db ready to send to the HTML email template
+    db_Asset_Models = Asset_Models.objects.select_related().order_by('model_category').filter(model_count_RTD__lt=F('model_min_qty')).values()
+
+    context = {'asset_model': db_Asset_Models}
+    return render(request, 'min_asset_levels/asset_report.html', context)

@@ -1,7 +1,7 @@
 from django.db import models
 
 class Asset_Models(models.Model):
-    snipe_model_id = models.IntegerField()
+    snipe_model_id = models.IntegerField(unique=True)
     model_name = models.CharField(max_length=250)
     model_manufacturer_name = models.CharField(max_length=250)
     model_number = models.CharField(max_length=250)
@@ -15,7 +15,7 @@ class Asset_Models(models.Model):
         return self.model_manufacturer_name + " " + self.model_name + " " + self.model_number
 
 class Asset_Report(models.Model):
-    snipe_model_id = models.IntegerField()
+    asset_model = models.ForeignKey(Asset_Models, on_delete=models.CASCADE)
     model_location = models.CharField(max_length=250)
     model_custom_fields = models.TextField()
     model_asset_id = models.CharField(max_length=250, default='None')

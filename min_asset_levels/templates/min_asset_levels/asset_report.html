@@ -1,0 +1,38 @@
+{% extends "min_asset_levels/email_base.html" %}
+
+{% block content %} 
+    {% if asset_model %}
+        {% autoescape off %}
+
+        {% regroup asset_model by model_category as asset_model_list %}
+
+        {% for catagory in asset_model_list%}
+                <tr>
+                    <td colspan="2" style="font-family: Geneva, Tahoma, Verdana, sans-serif; font-size: 16px; line-height: 22px; padding-top: 16px;">
+                        <h4 style="margin-bottom: 0px; margin-top: 25px;">{{ catagory.grouper }}</h4>
+                    </td>
+                </tr>
+                {% for asset in catagory.list %}
+                    <tr>
+                        <td colspan="2" style="font-family: Geneva, Tahoma, Verdana, sans-serif; font-size: 16px; line-height: 22px;  padding-top: 15px; " align="left"> 
+                            {{ asset.model_manufacturer_name }} {{ asset.model_name }} {{ asset.model_number }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="font-family: Geneva, Tahoma, Verdana, sans-serif; font-size: 14px; line-height: 22px;  padding-top: 4px;" align="left">
+                            Minimum Set Qty: <strong>{{ asset.model_min_qty }}</strong>
+                        </td>
+                        <td style="font-family: Geneva, Tahoma, Verdana, sans-serif; font-size: 14px; line-height: 22px;  padding-top: 4px;" align="left">
+                            Ready to Deploy: <strong>{{ asset.model_count_RTD}}</strong>
+                        </td>
+                    </tr>
+                {% endfor %}
+        {% endfor %}
+        {% endautoescape %}
+    {% else %}
+        <tr><td>
+            <p>All Assets are within their minimum levels</p>
+        </td></tr>
+   
+    {% endif %}
+{% endblock %}
