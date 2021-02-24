@@ -43,21 +43,21 @@
   <header>
     <!-- Fixed navbar -->
     <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-      <a class="navbar-brand" href="#">Minimum Asset Levels</a>
+      <a class="navbar-brand" href="/min_asset_levels/">Minimum Asset Levels</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">View Email</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-          </li>
+          {% if request.user.is_superuser %}
+            <li class="nav-item">
+                <!-- Adding back in what the git mess up took away -->
+                <a class="nav-link" href="/min_asset_levels/asset_models/assetreport" target="_blank">View Email</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin" target="_blank">Admin</a>
+            </li>
+          {% endif %}
         </ul>
       </div>
     </nav>

@@ -1,8 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.db.models import F
 from .models import Asset_Models, Asset_Report
 from .forms import EditMinQty
+from django.contrib.auth.decorators import login_required
 
 import requests
 import json
@@ -218,12 +219,14 @@ def populateReportTable():
     
     return return_output
 
+@login_required
 def index(request):
     db_Asset_Models = Asset_Models.objects.all()
 
     context = {'asset_model': db_Asset_Models}
     return render(request, 'min_asset_levels/index.html', context)
 
+@login_required
 def assetModelData(request):
     # Run the getSnipeModles(), return error if fail
     getSnipeModles()
@@ -233,6 +236,7 @@ def assetModelData(request):
 
     return HttpResponse(data, content_type="application/json")
 
+@login_required
 def minQtyUpdate(request, pk=0):
     # if this is a POST request we need to process the form data
     if request.method == 'POST':
@@ -259,11 +263,15 @@ def minQtyUpdate(request, pk=0):
     return render(request, 'min_asset_levels/EditMinQtyForm.html', {'form': form})
 
 def html_asset_report(request):
-    # Update the Report Data with the latest data from Snipe
-    # populateReportTable()
+    if request.user.is_authenticated:
+        # Update the Report Data with the latest data from Snipe
+        populateReportTable()
 
-    # Get the data from the db ready to send to the HTML email template
-    db_Asset_Models = Asset_Models.objects.select_related().order_by('model_category').filter(model_count_RTD__lt=F('model_min_qty')).values()
+        # Get the data from the db ready to send to the HTML email template
+        db_Asset_Models = Asset_Models.objects.select_related().order_by('model_category').filter(model_count_RTD__lt=F('model_min_qty')).values()
 
-    context = {'asset_model': db_Asset_Models}
-    return render(request, 'min_asset_levels/asset_report.html', context)
+        context = {'asset_model': db_Asset_Models}
+        return render(request, 'min_asset_levels/asset_report.html', context)
+    else:
+        response = redirect('/min_asset_levels/accounts/login/')
+        return response
