@@ -8,17 +8,18 @@ from django.contrib.auth.decorators import login_required
 import requests
 import json
 import re
+
 from requests.exceptions import HTTPError
 from pprint import pprint
 from deepdiff import DeepDiff
 
 
 BASE_API_URL = 'https://lululemon.snipe-it.io/api/v1/'
-API_KEY = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiMjRjMzFlM2YwM2U3ZDY5N2M2OTA0M2ZjNWQ5ZDQ5ZDRmMjc2MWE2YWIyMWQ0NWQwMmQzZjEzZDkyODg5ZTA4Mjk1NjVmM2U4ZDU4MzY3ZDAiLCJpYXQiOjE2MTAxMjY1NjUsIm5iZiI6MTYxMDEyNjU2NSwiZXhwIjoyMjQxMjc4NTY1LCJzdWIiOiIxIiwic2NvcGVzIjpbXX0.TiiH3SvsZGcffILLc_DH6t4nTvO1oRwMI-7fQoPmSCzJ-I3k9NeZIx0KFRwVWSmfzVf7sfYuo_6TYo4kzKvIXucDERq_i4FO8Di2pGE-si_ARhh_dGRofYNmlzAKsoJICLKM-ViuzlFsa7Jkfm4ZmWyqHZU6JSfTKNPsVNQ6_Ind2xt0oKd5RDD95tdLUOhHF1Txu0bOT0mNtHrq6flQepm7Rli5JLqqzFFckJvETiTW6ZxqtUUM0GyZX-kdjJsREJi5Gi9S8zROuv55UWWIIVBtmkVBqScJAeBIfxKPzKQADY8qQCwiTYv_xsVgd_URpT-WLrCVS5oILTHTG_CBf4V5S9tIC_UkqUx5jY6-2scOp4IgMy_S4OByoOGtZLf20tXY34wIjOZdSGQRNR7GIpuj8ha_lWlhjginARUy8duIBxHXGMwxY2GhnDs376YG6yuMgAezDS4oZ-seUWMXwUqOAmFyfY22EmplwOkFrm2-s6sPtB7T5taaaPm1ZXdM3l6Hm1CjsJuETyMG19vMIkhnWZDsoD9zzxkN8K8oMf_bWpJYKYxcfZvsde-FMRZaTMeSn-4JchO67yKxtmOiioPXBc6Ix545SkGOikmFf_EhXhSUPKmgJ5pGeX4iPkay-40FiM0gtGx18UDdZ45Mo0SyBuvAzOOlFus0g_1YAtg'
 
+# The SNIPE_API_KEY is in settings.py
 def SnipeApi(api_resource, params):
 
-    headers = {"Authorization": "Bearer " + API_KEY}
+    headers = {"Authorization": "Bearer " + SNIPE_API_KEY}
     querystring = {**params, "limit":"500", "offset":"0"}
     url = BASE_API_URL+api_resource
 

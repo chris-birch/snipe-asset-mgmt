@@ -12,6 +12,11 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 import os
+import environ 
+
+# Use environ lib to securly access Enviroment Veriables
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '65ep8-f&zq(412_snquahd$*oqns)u=q-9h8pw9mxzm(78%-mw'
+SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -125,3 +130,5 @@ STATIC_URL = '/static/'
 LOGIN_REDIRECT_URL = '/min_asset_levels/'
 
 LOGIN_URL = '/min_asset_levels/accounts/login/'
+
+SNIPE_API_KEY = env("SNIPE_API_KEY")
