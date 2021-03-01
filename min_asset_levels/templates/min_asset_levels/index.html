@@ -2,7 +2,6 @@
 
 {% block content %} 
 
-    {% if asset_model %}
         {% autoescape off %}
             <div id="toolbar">
                 <h6>Click on any row to modify the minimum quantity level</h6>
@@ -52,10 +51,5 @@
                 </div>
             </div>
             {% endautoescape %}
-    {% else %}
-
-        <p>No Modles</p>
-
-    {% endif %}
-
+            
 {% endblock %}

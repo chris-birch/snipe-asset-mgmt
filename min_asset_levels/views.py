@@ -8,17 +8,17 @@ from django.contrib.auth.decorators import login_required
 import requests
 import json
 import re
+import os
 
 from requests.exceptions import HTTPError
 from pprint import pprint
 from deepdiff import DeepDiff
 
-
+SNIPE_API_KEY = os.environ['SNIPE_API_KEY']
 BASE_API_URL = 'https://lululemon.snipe-it.io/api/v1/'
 
 # The SNIPE_API_KEY is in settings.py
 def SnipeApi(api_resource, params):
-
     headers = {"Authorization": "Bearer " + SNIPE_API_KEY}
     querystring = {**params, "limit":"500", "offset":"0"}
     url = BASE_API_URL+api_resource
@@ -44,7 +44,6 @@ def SnipeApi(api_resource, params):
 
 
 def getSnipeModles():
-    
     try:
         api_model_data = SnipeApi('models', {})
     
@@ -177,7 +176,6 @@ def populateReportTable():
             return json.dumps({"error": str(error.args)})
 
         if api_data:
-            
             # Update the asset model Ready_To_Deploy anount in the db
             db_asset_models.filter(id=each_db_asset_model['id']).update(model_count_RTD=int(api_data['total']))
 
