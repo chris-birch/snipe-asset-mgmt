@@ -1,2 +1,1 @@
-CREATE DATABASE sample_db ;
-CREATE USER testuser WITH PASSWORD 'testpassword';
+CREATE DATABASE django_db;
